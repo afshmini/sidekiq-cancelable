@@ -10,7 +10,7 @@ Gem::Specification.new do |gem|
 
   gem.executables = ["sidekiq", "sidekiqmon"]
   gem.files = %w[sidekiq.gemspec README.md Changes.md LICENSE.txt] + `git ls-files | grep -E '^(bin|lib|web)'`.split("\n")
-  gem.name = "sidekiq"
+  gem.name = "sidekiq-cancelable"
   gem.version = Sidekiq::VERSION
   gem.required_ruby_version = ">= 3.2.0"
 
