@@ -113,6 +113,18 @@ module Sidekiq
         redirect "#{root_path}busy"
       end
 
+      post "/busy/cancel" do
+        jid = url_params("jid")
+        halt(400) unless jid
+
+        workset = Sidekiq::WorkSet.new
+        if workset.cancel_job(jid)
+          redirect "#{root_path}busy"
+        else
+          halt(404, "Job not found or not running")
+        end
+      end
+
       get "/queues" do
         @queues = Sidekiq::Queue.all
 

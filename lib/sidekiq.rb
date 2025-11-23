@@ -149,6 +149,11 @@ module Sidekiq
   # otherwise Ruby's Thread#kill will commit.  See #377.
   # DO NOT RESCUE THIS ERROR IN YOUR JOBS
   class Shutdown < Interrupt; end
+
+  # Raised when a running job is cancelled via the Web UI.
+  # This allows jobs to be gracefully interrupted.
+  # DO NOT RESCUE THIS ERROR IN YOUR JOBS
+  class JobCancelled < Interrupt; end
 end
 
 require "sidekiq/rails" if defined?(::Rails::Engine)

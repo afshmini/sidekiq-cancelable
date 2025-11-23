@@ -431,3 +431,4 @@ end
 require "sidekiq/systemd"
 require "sidekiq/metrics/tracking"
 require "sidekiq/job/interrupt_handler"
+require "sidekiq/middleware/server/job_cancellation"

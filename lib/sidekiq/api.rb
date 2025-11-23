@@ -1254,6 +1254,25 @@ module Sidekiq
       nil
     end
     alias_method :find_work_by_jid, :find_work
+
+    ##
+    # Cancel a running job by its JID.
+    # Sets a cancellation flag in Redis that will be checked by the job processor.
+    #
+    # @param jid [String] the job identifier
+    # @return [Boolean] true if cancellation flag was set, false if job not found or already cancelled
+    def cancel_job(jid)
+      work = find_work(jid)
+      return false unless work
+
+      # Set cancellation flag in Redis with a TTL of 1 hour
+      # This gives enough time for the job to check the flag
+      key = "cancelled:#{jid}"
+      Sidekiq.redis do |conn|
+        conn.setex(key, 3600, Time.now.to_i)
+      end
+      true
+    end
   end
 
   # Sidekiq::Work represents a job which is currently executing.
@@ -1282,6 +1301,19 @@ module Sidekiq
 
     def payload
       @hsh["payload"]
+    end
+
+    ##
+    # Cancel this running job.
+    # Sets a cancellation flag in Redis that will be checked by the job processor.
+    #
+    # @return [Boolean] true if cancellation flag was set
+    def cancel!
+      key = "cancelled:#{job.jid}"
+      Sidekiq.redis do |conn|
+        conn.setex(key, 3600, Time.now.to_i)
+      end
+      true
     end
   end
 

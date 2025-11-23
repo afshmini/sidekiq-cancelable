@@ -158,9 +158,9 @@ module Sidekiq
       end
     end
 
-    IGNORE_SHUTDOWN_INTERRUPTS = {Sidekiq::Shutdown => :never}
+    IGNORE_SHUTDOWN_INTERRUPTS = {Sidekiq::Shutdown => :never, Sidekiq::JobCancelled => :never}
     private_constant :IGNORE_SHUTDOWN_INTERRUPTS
-    ALLOW_SHUTDOWN_INTERRUPTS = {Sidekiq::Shutdown => :immediate}
+    ALLOW_SHUTDOWN_INTERRUPTS = {Sidekiq::Shutdown => :immediate, Sidekiq::JobCancelled => :immediate}
     private_constant :ALLOW_SHUTDOWN_INTERRUPTS
 
     def process(uow)
@@ -197,6 +197,10 @@ module Sidekiq
           # Had to force kill this job because it didn't finish
           # within the timeout.  Don't acknowledge the work since
           # we didn't properly finish it.
+        rescue Sidekiq::JobCancelled
+          # Job was cancelled via the Web UI.  Don't acknowledge the work since
+          # we didn't properly finish it.
+          logger.info { "Job #{job_hash['jid']} was cancelled" }
         rescue Sidekiq::JobRetry::Skip => s
           # Skip means we handled this error elsewhere. We don't
           # need to log or report the error.

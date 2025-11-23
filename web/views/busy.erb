@@ -121,6 +121,7 @@
         <th><%= t('Job') %></th>
         <th><%= t('Arguments') %></th>
         <th><%= t('Started') %></th>
+        <th>&nbsp;</th>
       </thead>
       <% @workset.each do |process, thread, work| %>
         <% job = work.job %>
@@ -139,6 +140,13 @@
             <code><div class="args"><%= display_args(job.display_args) %></div></code>
           </td>
           <td><%= relative_time(work.run_at) %></td>
+          <td>
+            <form method="POST" action="<%= root_path %>busy/cancel" style="display: inline;">
+              <%= csrf_tag %>
+              <input type="hidden" name="jid" value="<%= job.jid %>">
+              <button class="btn btn-warn" type="submit" data-confirm="<%= t('AreYouSure') %>"><%= t('Cancel') %></button>
+            </form>
+          </td>
         </tr>
       <% end %>
     </table>
